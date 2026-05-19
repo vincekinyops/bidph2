@@ -33,7 +33,7 @@ function KycForm() {
     return path
   }
 
-  async function onSubmit(e: React.FormEvent) {
+  async function onSubmit(e: React.SubmitEvent) {
     e.preventDefault()
     if (!profile || !govId || !selfie) {
       setError('Both government ID and selfie are required.')

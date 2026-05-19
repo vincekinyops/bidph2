@@ -28,7 +28,7 @@ function NewAuctionForm() {
   const [endTime, setEndTime] = useState('')
   const [error, setError] = useState<string | null>(null)
 
-  async function createDraft(e: React.FormEvent) {
+  async function createDraft(e: React.SubmitEvent) {
     e.preventDefault()
     if (!profile) return
     const end = endTime || new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 16)

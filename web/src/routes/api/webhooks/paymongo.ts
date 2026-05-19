@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { json } from '@tanstack/react-start'
 import { createServiceClient } from '../../../lib/supabase'
 
 export const Route = createFileRoute('/api/webhooks/paymongo')({
@@ -10,7 +9,7 @@ export const Route = createFileRoute('/api/webhooks/paymongo')({
         try {
           body = await request.json()
         } catch {
-          return json({ error: 'Invalid JSON' }, { status: 400 })
+          return Response.json({ error: 'Invalid JSON' }, { status: 400 })
         }
 
         const data = body.data as Record<string, unknown> | undefined
@@ -22,7 +21,10 @@ export const Route = createFileRoute('/api/webhooks/paymongo')({
         const amount = amountCentavos ? amountCentavos / 100 : 0
 
         if (!userId || amount <= 0) {
-          return json({ error: 'Missing user_id or amount in metadata' }, { status: 400 })
+          return Response.json(
+            { error: 'Missing user_id or amount in metadata' },
+            { status: 400 },
+          )
         }
 
         try {
@@ -36,12 +38,12 @@ export const Route = createFileRoute('/api/webhooks/paymongo')({
             p_idempotency_key: externalId,
           })
           if (error) {
-            return json({ error: error.message }, { status: 500 })
+            return Response.json({ error: error.message }, { status: 500 })
           }
-          return json({ received: true })
+          return Response.json({ received: true })
         } catch (err) {
           const message = err instanceof Error ? err.message : 'Server error'
-          return json({ error: message }, { status: 500 })
+          return Response.json({ error: message }, { status: 500 })
         }
       },
     },
