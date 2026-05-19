@@ -1,0 +1,3 @@
+-- Optional seed: promote a user to admin after they register (replace email).
+-- Example (run manually after signup):
+-- UPDATE public.users SET role = 'admin' WHERE email = 'admin@example.com';
