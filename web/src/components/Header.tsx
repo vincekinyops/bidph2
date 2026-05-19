@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { Gavel } from 'lucide-react'
 import { useAuth } from '../lib/auth'
+import { isAdmin } from '../lib/permissions'
 import ThemeToggle from './ThemeToggle'
 
 export default function Header() {
@@ -32,8 +33,8 @@ export default function Header() {
               <Link to="/account" className="nav-link no-underline">
                 Account
               </Link>
-              {profile?.role === 'admin' && (
-                <Link to="/admin/kyc" className="nav-link no-underline">
+              {isAdmin(profile, authUser.email) && (
+                <Link to="/admin" className="nav-link no-underline">
                   Admin
                 </Link>
               )}

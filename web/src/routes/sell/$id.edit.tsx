@@ -1,23 +1,18 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import { RequireAuth } from '../../components/RequireAuth'
+import { requireAuth } from '../../lib/route-guards'
 import { Alert, Button, Card, Input, Page } from '../../components/ui'
 import { formatPhp } from '../../lib/money'
 import type { Auction } from '../../lib/database.types'
 import { supabase } from '../../lib/supabase'
 
 export const Route = createFileRoute('/sell/$id/edit')({
-  component: EditAuctionPage,
+  beforeLoad: async ({ location }) => {
+    await requireAuth({ redirectTo: location.pathname })
+  },
+  component: EditAuctionForm,
 })
-
-function EditAuctionPage() {
-  return (
-    <RequireAuth>
-      <EditAuctionForm />
-    </RequireAuth>
-  )
-}
 
 function EditAuctionForm() {
   const { id } = Route.useParams()

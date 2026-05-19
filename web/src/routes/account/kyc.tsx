@@ -1,22 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { AccountNav } from '../../components/AccountNav'
-import { RequireAuth } from '../../components/RequireAuth'
+import { requireAuth } from '../../lib/route-guards'
 import { Alert, Button, Card, Page } from '../../components/ui'
 import { useAuth } from '../../lib/auth'
 import { supabase } from '../../lib/supabase'
 
 export const Route = createFileRoute('/account/kyc')({
-  component: KycPage,
+  beforeLoad: async ({ location }) => {
+    await requireAuth({ redirectTo: location.pathname })
+  },
+  component: KycForm,
 })
-
-function KycPage() {
-  return (
-    <RequireAuth>
-      <KycForm />
-    </RequireAuth>
-  )
-}
 
 function KycForm() {
   const { profile, refreshProfile } = useAuth()

@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import { RequireAuth } from '../../components/RequireAuth'
+import { RequireKycToBid } from '../../components/RequireAuth'
 import { Alert, Button, Card, Input, Page } from '../../components/ui'
 import { useAuth } from '../../lib/auth'
 import { formatPhp, parseMoneyInput } from '../../lib/money'
@@ -115,8 +115,11 @@ function AuctionDetailPage() {
     if (err) {
       if (err.message.includes('Insufficient bidding funds')) {
         setShowAllocate(true)
+      } else if (err.message.includes('KYC verification required')) {
+        setError('Identity verification is required before you can bid.')
+      } else {
+        setError(err.message)
       }
-      setError(err.message)
       return
     }
     setBidAmount('')
@@ -208,7 +211,7 @@ function AuctionDetailPage() {
       </Card>
 
       {auction.status === 'active' && (
-        <RequireAuth>
+        <RequireKycToBid>
           <Card className="mb-6">
             <h2 className="mb-4 font-semibold">Place a bid</h2>
             <Input
@@ -236,7 +239,7 @@ function AuctionDetailPage() {
               </div>
             )}
           </Card>
-        </RequireAuth>
+        </RequireKycToBid>
       )}
 
       <Card>

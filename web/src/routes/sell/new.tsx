@@ -1,22 +1,17 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
-import { RequireAuth } from '../../components/RequireAuth'
+import { requireAuth } from '../../lib/route-guards'
 import { Alert, Button, Card, Input, Page } from '../../components/ui'
 import { useAuth } from '../../lib/auth'
 import { parseMoneyInput } from '../../lib/money'
 import { supabase } from '../../lib/supabase'
 
 export const Route = createFileRoute('/sell/new')({
-  component: NewAuctionPage,
+  beforeLoad: async ({ location }) => {
+    await requireAuth({ redirectTo: location.pathname })
+  },
+  component: NewAuctionForm,
 })
-
-function NewAuctionPage() {
-  return (
-    <RequireAuth>
-      <NewAuctionForm />
-    </RequireAuth>
-  )
-}
 
 function NewAuctionForm() {
   const { profile } = useAuth()

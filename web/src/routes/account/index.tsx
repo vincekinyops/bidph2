@@ -2,7 +2,7 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo } from 'react'
 import { AccountNav } from '../../components/AccountNav'
-import { RequireAuth } from '../../components/RequireAuth'
+import { requireAuth } from '../../lib/route-guards'
 import { Alert, Button, Card, Page } from '../../components/ui'
 import { useAuth } from '../../lib/auth'
 import type { Auction, Bid, WatchlistItem } from '../../lib/database.types'
@@ -11,16 +11,11 @@ import { supabase } from '../../lib/supabase'
 import { formatUserRef } from '../../lib/user'
 
 export const Route = createFileRoute('/account/')({
-  component: AccountPage,
+  beforeLoad: async ({ location }) => {
+    await requireAuth({ redirectTo: location.pathname })
+  },
+  component: AccountContent,
 })
-
-function AccountPage() {
-  return (
-    <RequireAuth>
-      <AccountContent />
-    </RequireAuth>
-  )
-}
 
 interface WatchlistRow extends WatchlistItem {
   auction: Auction

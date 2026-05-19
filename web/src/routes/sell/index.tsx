@@ -1,6 +1,6 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { RequireAuth } from '../../components/RequireAuth'
+import { requireAuth } from '../../lib/route-guards'
 import { Button, Card, Page } from '../../components/ui'
 import { useAuth } from '../../lib/auth'
 import { formatPhp } from '../../lib/money'
@@ -8,16 +8,11 @@ import type { Auction } from '../../lib/database.types'
 import { supabase } from '../../lib/supabase'
 
 export const Route = createFileRoute('/sell/')({
-  component: SellDashboard,
+  beforeLoad: async ({ location }) => {
+    await requireAuth({ redirectTo: location.pathname })
+  },
+  component: SellContent,
 })
-
-function SellDashboard() {
-  return (
-    <RequireAuth>
-      <SellContent />
-    </RequireAuth>
-  )
-}
 
 function SellContent() {
   const { profile } = useAuth()

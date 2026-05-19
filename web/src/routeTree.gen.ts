@@ -11,15 +11,20 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WalletIndexRouteImport } from './routes/wallet/index'
 import { Route as SellIndexRouteImport } from './routes/sell/index'
 import { Route as AuctionsIndexRouteImport } from './routes/auctions/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as WalletCashInRouteImport } from './routes/wallet/cash-in'
 import { Route as SellNewRouteImport } from './routes/sell/new'
 import { Route as AuctionsIdRouteImport } from './routes/auctions/$id'
+import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as AdminKycRouteImport } from './routes/admin/kyc'
+import { Route as AdminBidsRouteImport } from './routes/admin/bids'
+import { Route as AdminAuctionsRouteImport } from './routes/admin/auctions'
 import { Route as AccountProfileRouteImport } from './routes/account/profile'
 import { Route as AccountKycRouteImport } from './routes/account/kyc'
 import { Route as SellIdEditRouteImport } from './routes/sell/$id.edit'
@@ -33,6 +38,11 @@ const RegisterRoute = RegisterRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -55,6 +65,11 @@ const AuctionsIndexRoute = AuctionsIndexRouteImport.update({
   path: '/auctions/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AccountIndexRoute = AccountIndexRouteImport.update({
   id: '/account/',
   path: '/account/',
@@ -75,10 +90,25 @@ const AuctionsIdRoute = AuctionsIdRouteImport.update({
   path: '/auctions/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminKycRoute = AdminKycRouteImport.update({
-  id: '/admin/kyc',
-  path: '/admin/kyc',
-  getParentRoute: () => rootRouteImport,
+  id: '/kyc',
+  path: '/kyc',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminBidsRoute = AdminBidsRouteImport.update({
+  id: '/bids',
+  path: '/bids',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminAuctionsRoute = AdminAuctionsRouteImport.update({
+  id: '/auctions',
+  path: '/auctions',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const AccountProfileRoute = AccountProfileRouteImport.update({
   id: '/account/profile',
@@ -103,15 +133,20 @@ const ApiWebhooksPaymongoRoute = ApiWebhooksPaymongoRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/account/kyc': typeof AccountKycRoute
   '/account/profile': typeof AccountProfileRoute
+  '/admin/auctions': typeof AdminAuctionsRoute
+  '/admin/bids': typeof AdminBidsRoute
   '/admin/kyc': typeof AdminKycRoute
+  '/admin/users': typeof AdminUsersRoute
   '/auctions/$id': typeof AuctionsIdRoute
   '/sell/new': typeof SellNewRoute
   '/wallet/cash-in': typeof WalletCashInRoute
   '/account/': typeof AccountIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/auctions/': typeof AuctionsIndexRoute
   '/sell/': typeof SellIndexRoute
   '/wallet/': typeof WalletIndexRoute
@@ -124,11 +159,15 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/account/kyc': typeof AccountKycRoute
   '/account/profile': typeof AccountProfileRoute
+  '/admin/auctions': typeof AdminAuctionsRoute
+  '/admin/bids': typeof AdminBidsRoute
   '/admin/kyc': typeof AdminKycRoute
+  '/admin/users': typeof AdminUsersRoute
   '/auctions/$id': typeof AuctionsIdRoute
   '/sell/new': typeof SellNewRoute
   '/wallet/cash-in': typeof WalletCashInRoute
   '/account': typeof AccountIndexRoute
+  '/admin': typeof AdminIndexRoute
   '/auctions': typeof AuctionsIndexRoute
   '/sell': typeof SellIndexRoute
   '/wallet': typeof WalletIndexRoute
@@ -138,15 +177,20 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/account/kyc': typeof AccountKycRoute
   '/account/profile': typeof AccountProfileRoute
+  '/admin/auctions': typeof AdminAuctionsRoute
+  '/admin/bids': typeof AdminBidsRoute
   '/admin/kyc': typeof AdminKycRoute
+  '/admin/users': typeof AdminUsersRoute
   '/auctions/$id': typeof AuctionsIdRoute
   '/sell/new': typeof SellNewRoute
   '/wallet/cash-in': typeof WalletCashInRoute
   '/account/': typeof AccountIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/auctions/': typeof AuctionsIndexRoute
   '/sell/': typeof SellIndexRoute
   '/wallet/': typeof WalletIndexRoute
@@ -157,15 +201,20 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/login'
     | '/register'
     | '/account/kyc'
     | '/account/profile'
+    | '/admin/auctions'
+    | '/admin/bids'
     | '/admin/kyc'
+    | '/admin/users'
     | '/auctions/$id'
     | '/sell/new'
     | '/wallet/cash-in'
     | '/account/'
+    | '/admin/'
     | '/auctions/'
     | '/sell/'
     | '/wallet/'
@@ -178,11 +227,15 @@ export interface FileRouteTypes {
     | '/register'
     | '/account/kyc'
     | '/account/profile'
+    | '/admin/auctions'
+    | '/admin/bids'
     | '/admin/kyc'
+    | '/admin/users'
     | '/auctions/$id'
     | '/sell/new'
     | '/wallet/cash-in'
     | '/account'
+    | '/admin'
     | '/auctions'
     | '/sell'
     | '/wallet'
@@ -191,15 +244,20 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/login'
     | '/register'
     | '/account/kyc'
     | '/account/profile'
+    | '/admin/auctions'
+    | '/admin/bids'
     | '/admin/kyc'
+    | '/admin/users'
     | '/auctions/$id'
     | '/sell/new'
     | '/wallet/cash-in'
     | '/account/'
+    | '/admin/'
     | '/auctions/'
     | '/sell/'
     | '/wallet/'
@@ -209,11 +267,11 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   AccountKycRoute: typeof AccountKycRoute
   AccountProfileRoute: typeof AccountProfileRoute
-  AdminKycRoute: typeof AdminKycRoute
   AuctionsIdRoute: typeof AuctionsIdRoute
   SellNewRoute: typeof SellNewRoute
   WalletCashInRoute: typeof WalletCashInRoute
@@ -239,6 +297,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -269,6 +334,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuctionsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/account/': {
       id: '/account/'
       path: '/account'
@@ -297,12 +369,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuctionsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/kyc': {
       id: '/admin/kyc'
-      path: '/admin/kyc'
+      path: '/kyc'
       fullPath: '/admin/kyc'
       preLoaderRoute: typeof AdminKycRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/bids': {
+      id: '/admin/bids'
+      path: '/bids'
+      fullPath: '/admin/bids'
+      preLoaderRoute: typeof AdminBidsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/auctions': {
+      id: '/admin/auctions'
+      path: '/auctions'
+      fullPath: '/admin/auctions'
+      preLoaderRoute: typeof AdminAuctionsRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/account/profile': {
       id: '/account/profile'
@@ -335,13 +428,33 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteRouteChildren {
+  AdminAuctionsRoute: typeof AdminAuctionsRoute
+  AdminBidsRoute: typeof AdminBidsRoute
+  AdminKycRoute: typeof AdminKycRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminAuctionsRoute: AdminAuctionsRoute,
+  AdminBidsRoute: AdminBidsRoute,
+  AdminKycRoute: AdminKycRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
+  AdminRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRouteRoute: AdminRouteRouteWithChildren,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   AccountKycRoute: AccountKycRoute,
   AccountProfileRoute: AccountProfileRoute,
-  AdminKycRoute: AdminKycRoute,
   AuctionsIdRoute: AuctionsIdRoute,
   SellNewRoute: SellNewRoute,
   WalletCashInRoute: WalletCashInRoute,

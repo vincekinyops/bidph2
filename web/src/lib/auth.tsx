@@ -9,6 +9,8 @@ import {
 } from 'react'
 import type { Session, User as AuthUser } from '@supabase/supabase-js'
 import type { User } from './database.types'
+import { env } from './env'
+import { isDevAdminEmail } from './permissions'
 import { supabase } from './supabase'
 
 interface AuthState {
@@ -29,7 +31,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   const refreshProfile = useCallback(async () => {
-    const uid = (await supabase.auth.getUser()).data.user?.id
+    const { data: authData } = await supabase.auth.getUser()
+    const uid = authData.user?.id
     if (!uid) {
       setProfile(null)
       return
@@ -39,7 +42,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .select('*')
       .eq('id', uid)
       .maybeSingle()
-    setProfile((data as User | null) ?? null)
+
+    let profile = (data as User | null) ?? null
+
+    if (
+      env.isDev &&
+      env.devAdminEmail &&
+      profile?.role !== 'admin' &&
+      isDevAdminEmail(authData.user?.email ?? profile?.email)
+    ) {
+      await supabase.rpc('claim_dev_admin', { p_expected_email: env.devAdminEmail })
+      const { data: refreshed } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', uid)
+        .maybeSingle()
+      profile = (refreshed as User | null) ?? profile
+    }
+
+    setProfile(profile)
   }, [])
 
   useEffect(() => {

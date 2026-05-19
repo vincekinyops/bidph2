@@ -1,7 +1,7 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { RequireAuth } from '../../components/RequireAuth'
+import { requireAuth } from '../../lib/route-guards'
 import { Alert, Button, Card, Input, Page } from '../../components/ui'
 import { useAuth } from '../../lib/auth'
 import { formatPhp, parseMoneyInput } from '../../lib/money'
@@ -9,16 +9,11 @@ import type { Wallet, WalletTransaction } from '../../lib/database.types'
 import { supabase } from '../../lib/supabase'
 
 export const Route = createFileRoute('/wallet/')({
-  component: WalletPage,
+  beforeLoad: async ({ location }) => {
+    await requireAuth({ redirectTo: location.pathname })
+  },
+  component: WalletContent,
 })
-
-function WalletPage() {
-  return (
-    <RequireAuth>
-      <WalletContent />
-    </RequireAuth>
-  )
-}
 
 function WalletContent() {
   const { profile } = useAuth()

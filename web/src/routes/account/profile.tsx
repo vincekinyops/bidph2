@@ -1,23 +1,18 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { AccountNav } from '../../components/AccountNav'
-import { RequireAuth } from '../../components/RequireAuth'
+import { requireAuth } from '../../lib/route-guards'
 import { Alert, Button, Card, Input, Page } from '../../components/ui'
 import { useAuth } from '../../lib/auth'
 import { supabase } from '../../lib/supabase'
 import { formatUserRef } from '../../lib/user'
 
 export const Route = createFileRoute('/account/profile')({
-  component: ProfilePage,
+  beforeLoad: async ({ location }) => {
+    await requireAuth({ redirectTo: location.pathname })
+  },
+  component: ProfileForm,
 })
-
-function ProfilePage() {
-  return (
-    <RequireAuth>
-      <ProfileForm />
-    </RequireAuth>
-  )
-}
 
 function ProfileForm() {
   const { profile, refreshProfile } = useAuth()

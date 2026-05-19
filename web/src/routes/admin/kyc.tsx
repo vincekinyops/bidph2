@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { RequireAdmin, RequireAuth } from '../../components/RequireAuth'
-import { Button, Card, Page } from '../../components/ui'
+import { Button, Card } from '../../components/ui'
 import type { KycSubmission } from '../../lib/database.types'
 import { supabase } from '../../lib/supabase'
 
@@ -10,18 +9,8 @@ export const Route = createFileRoute('/admin/kyc')({
 })
 
 function AdminKycPage() {
-  return (
-    <RequireAuth>
-      <RequireAdmin>
-        <AdminKycQueue />
-      </RequireAdmin>
-    </RequireAuth>
-  )
-}
-
-function AdminKycQueue() {
   const qc = useQueryClient()
-  const { data: submissions } = useQuery({
+  const { data: submissions, isLoading } = useQuery({
     queryKey: ['kyc-pending'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -41,11 +30,17 @@ function AdminKycQueue() {
       p_rejection_reason: status === 'rejected' ? 'Documents unclear' : null,
     })
     await qc.invalidateQueries({ queryKey: ['kyc-pending'] })
+    await qc.invalidateQueries({ queryKey: ['admin-users'] })
   }
 
+  if (isLoading) return <Card>Loading KYC queue…</Card>
+
   return (
-    <Page>
-      <h1 className="mb-6 text-3xl font-bold">KYC review</h1>
+    <div>
+      <h2 className="mb-4 text-xl font-semibold">KYC review</h2>
+      <p className="mb-4 text-sm text-[var(--sea-ink-soft)]">
+        Approve users so they can bid, cash in, and sell. Rejected users may resubmit.
+      </p>
       <ul className="space-y-4">
         {submissions?.map((s) => (
           <li key={s.id}>
@@ -66,6 +61,6 @@ function AdminKycQueue() {
         ))}
         {!submissions?.length && <Card>No pending submissions.</Card>}
       </ul>
-    </Page>
+    </div>
   )
 }

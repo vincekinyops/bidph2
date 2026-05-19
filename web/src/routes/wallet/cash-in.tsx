@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { RequireAuth } from '../../components/RequireAuth'
+import { requireKycApproved } from '../../lib/route-guards'
 import { Alert, Button, Card, Input, Page } from '../../components/ui'
 import { useAuth } from '../../lib/auth'
 import { parseMoneyInput } from '../../lib/money'
@@ -8,16 +8,11 @@ import { env } from '../../lib/env'
 import { supabase } from '../../lib/supabase'
 
 export const Route = createFileRoute('/wallet/cash-in')({
-  component: CashInPage,
+  beforeLoad: async ({ location }) => {
+    await requireKycApproved({ redirectTo: location.pathname })
+  },
+  component: CashInForm,
 })
-
-function CashInPage() {
-  return (
-    <RequireAuth>
-      <CashInForm />
-    </RequireAuth>
-  )
-}
 
 function CashInForm() {
   const { profile } = useAuth()

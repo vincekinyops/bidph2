@@ -3,12 +3,20 @@ import { useState } from 'react'
 import { Alert, Button, Card, Input, Page } from '../components/ui'
 import { supabase } from '../lib/supabase'
 
+type LoginSearch = {
+  redirect?: string
+}
+
 export const Route = createFileRoute('/login')({
+  validateSearch: (search: Record<string, unknown>): LoginSearch => ({
+    redirect: typeof search.redirect === 'string' ? search.redirect : undefined,
+  }),
   component: LoginPage,
 })
 
 function LoginPage() {
   const navigate = useNavigate()
+  const { redirect } = Route.useSearch()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -22,6 +30,10 @@ function LoginPage() {
     setLoading(false)
     if (err) {
       setError(err.message)
+      return
+    }
+    if (redirect && redirect.startsWith('/')) {
+      window.location.href = redirect
       return
     }
     navigate({ to: '/' })
