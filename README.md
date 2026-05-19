@@ -53,11 +53,14 @@ pnpm db:reset
 
 `seed.sql` inserts **demo auctions only** — no users, wallets, or bids. Listings are owned by the first `seller` / `admin` in the database.
 
-On a fresh `pnpm db:reset` there are no users yet, so the seed skips. After you register and have a seller account:
+On a fresh `pnpm db:reset` there are no users yet, so the seed skips. After at least one account exists at `/register`:
 
 ```bash
-pnpm db:seed-items
+pnpm db:seed-items          # local
+pnpm db:seed-items:remote   # linked Supabase (demo/staging)
 ```
+
+The seed prints a status table. If no seller exists yet, it promotes the oldest user to seller for demo listings.
 
 **Create an admin** (local dev):
 
@@ -116,7 +119,8 @@ Open [http://localhost:3000](http://localhost:3000).
 | `pnpm build` | Production build |
 | `pnpm db:start` | Start local Supabase |
 | `pnpm db:reset` | Reset DB, re-run migrations, run seed (items if seller exists) |
-| `pnpm db:seed-items` | Insert demo auctions (requires a seller account) |
+| `pnpm db:seed-items` | Insert demo auctions locally |
+| `pnpm db:seed-items:remote` | Insert demo auctions on linked Supabase project |
 
 ## Project layout
 
@@ -138,7 +142,7 @@ For local testing without PayMongo, use **Simulate cash-in** on the cash-in page
 
 ## Production notes
 
-- Do **not** run `seed.sql` on production (`supabase db reset` with seed is local-only). Remote deploys should use migrations only (`db push`).
+- Schema deploys use migrations only (`supabase db push`). Demo auction data: `pnpm db:seed-items:remote` (not `db reset` on remote).
 - Never commit or automate admin credentials; promote admins manually per environment.
 - Disable or remove `dev_simulate_cash_in` before production.
 - Configure Supabase Auth OAuth (Google/Facebook) in the dashboard.

@@ -1,15 +1,25 @@
 -- =============================================================================
--- BidPH LOCAL DEVELOPMENT SEED — auction items only (no users, bids, or wallets).
--- Do not run on production.
+-- BidPH demo seed — auction items only (no users, bids, or wallets).
 --
--- Requires a seller in public.users (register + KYC approval, or promote role).
--- On a fresh `db reset` with no users yet, this seed is a no-op. Then run:
---   pnpm db:seed-items
+-- Local:  pnpm db:seed-items
+-- Remote: pnpm db:seed-items:remote   (linked Supabase project)
+--
+-- Needs at least one registered user. If none are seller/admin, the oldest
+-- user is promoted to seller + approved KYC so demo listings can be created.
 -- =============================================================================
+
+CREATE TEMP TABLE IF NOT EXISTS _bidph_seed_status (
+  outcome TEXT NOT NULL,
+  seller_id UUID,
+  auctions_inserted INT NOT NULL DEFAULT 0
+);
+
+TRUNCATE _bidph_seed_status;
 
 DO $seed$
 DECLARE
   v_seller_id UUID;
+  v_outcome TEXT;
 
   c_auction_iphone   UUID := 'a1000001-0000-4000-8000-000000000001';
   c_auction_dunk     UUID := 'a1000002-0000-4000-8000-000000000002';
@@ -24,12 +34,29 @@ BEGIN
   LIMIT 1;
 
   IF v_seller_id IS NULL THEN
-    RAISE NOTICE 'BidPH seed: skipped items — no seller yet. After you have a seller account, run: pnpm db:seed-items';
-    RETURN;
+    SELECT id INTO v_seller_id
+    FROM public.users
+    ORDER BY created_at
+    LIMIT 1;
+
+    IF v_seller_id IS NULL THEN
+      INSERT INTO _bidph_seed_status (outcome, seller_id, auctions_inserted)
+      VALUES ('skipped — no users; register at /register first', NULL, 0);
+      RETURN;
+    END IF;
+
+    UPDATE public.users
+    SET role = 'seller', kyc_status = 'approved'
+    WHERE id = v_seller_id;
+
+    v_outcome := 'promoted first user to seller and inserted demo auctions';
+  ELSE
+    v_outcome := 'inserted demo auctions';
   END IF;
 
   IF EXISTS (SELECT 1 FROM public.auctions WHERE id = c_auction_iphone) THEN
-    RAISE NOTICE 'BidPH seed: auction items already present, skipping.';
+    INSERT INTO _bidph_seed_status (outcome, seller_id, auctions_inserted)
+    VALUES ('skipped — demo auctions already exist', v_seller_id, 0);
     RETURN;
   END IF;
 
@@ -96,6 +123,20 @@ BEGIN
     (c_auction_jeepney, 'auction-images/seed/jeepney-1.jpg', 0),
     (c_auction_macbook, 'auction-images/seed/macbook-1.jpg', 0);
 
-  RAISE NOTICE 'BidPH seed: inserted demo auction items for seller %', v_seller_id;
+  INSERT INTO _bidph_seed_status (outcome, seller_id, auctions_inserted)
+  VALUES (v_outcome, v_seller_id, 5);
 END;
 $seed$;
+
+SELECT outcome, seller_id, auctions_inserted FROM _bidph_seed_status;
+
+SELECT id, title, status
+FROM public.auctions
+WHERE id IN (
+  'a1000001-0000-4000-8000-000000000001',
+  'a1000002-0000-4000-8000-000000000002',
+  'a1000003-0000-4000-8000-000000000003',
+  'a1000004-0000-4000-8000-000000000004',
+  'a1000005-0000-4000-8000-000000000005'
+)
+ORDER BY title;
