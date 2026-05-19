@@ -3,14 +3,62 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-@source "../components/**/*.{tsx,ts}";
-@source "../routes/**/*.{tsx,ts}";
+@source "./components/**/*.{tsx,ts}";
+@source "./routes/**/*.{tsx,ts}";
 
 @theme {
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
 }
 
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+@custom-variant dark (&:is(.dark *));
+
 :root {
+  --radius: 0.75rem;
+  --background: var(--bg-base);
+  --foreground: var(--sea-ink);
+  --card: var(--surface-strong);
+  --card-foreground: var(--sea-ink);
+  --popover: var(--surface-strong);
+  --popover-foreground: var(--sea-ink);
+  --primary: #b45309;
+  --primary-foreground: #ffffff;
+  --secondary: var(--foam);
+  --secondary-foreground: var(--sea-ink);
+  --muted: var(--foam);
+  --muted-foreground: var(--sea-ink-soft);
+  --accent: var(--link-bg-hover);
+  --accent-foreground: var(--sea-ink);
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--lagoon);
   --sea-ink: #0f172a;
   --sea-ink-soft: #64748b;
   --lagoon: #b45309;
@@ -36,6 +84,25 @@
 
 :root.dark,
 :root[data-theme="dark"] {
+  --background: var(--bg-base);
+  --foreground: var(--sea-ink);
+  --card: var(--surface-strong);
+  --card-foreground: var(--sea-ink);
+  --popover: var(--surface-strong);
+  --popover-foreground: var(--sea-ink);
+  --primary: #fbbf24;
+  --primary-foreground: #0f172a;
+  --secondary: #334155;
+  --secondary-foreground: var(--sea-ink);
+  --muted: #1e293b;
+  --muted-foreground: var(--sea-ink-soft);
+  --accent: var(--link-bg-hover);
+  --accent-foreground: var(--sea-ink);
+  --destructive: #f87171;
+  --destructive-foreground: #0f172a;
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--lagoon);
   --sea-ink: #f1f5f9;
   --sea-ink-soft: #94a3b8;
   --lagoon: #fbbf24;

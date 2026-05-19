@@ -7,8 +7,3 @@ dist
 web/.env.local
 .turbo
 .vercel
-supabase/.branches
-supabase/.temp
-
-# Local specs / planning (not shared via repo)
-docs/

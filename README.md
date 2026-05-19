@@ -1,90 +1,58 @@
-# BidPH
+# BidPH (web)
 
-Philippine real-time auction platform with a closed-loop wallet (Idle / Bidding funds), Supabase backend, and PayMongo payments.
+Philippine real-time auction platform with a closed-loop wallet (Idle / Bidding funds), Supabase client (Auth, Realtime, RLS reads), and PayMongo payments (via API).
 
-Built from [docs/spec-v1.md](./docs/spec-v1.md) and [docs/spec-v1-plan.md](./docs/spec-v1-plan.md).
+Built from [spec-v1.md](../docs/spec-v1.md) and [spec-v1-plan.md](../docs/spec-v1-plan.md).
+
+**Database & migrations** live in [`../bidph-api`](../bidph-api) — start Supabase from that repo, then configure this app.
 
 ## Stack
 
 - **Frontend:** TanStack Start, TanStack Router, TanStack Query, Tailwind CSS, TypeScript
-- **Backend:** Supabase (Postgres, Auth, Storage, Realtime, RPC)
-- **Payments:** PayMongo (webhook + local dev simulate)
+- **Backend (client):** Supabase Auth, Realtime, Storage, RLS-backed queries
+- **Backend (server):** [`bidph-api`](../bidph-api) — Postgres migrations, Hono API (planned)
 
 ## Prerequisites
 
 - Node.js 20+
 - [pnpm](https://pnpm.io/)
-- [Docker](https://www.docker.com/) (for local Supabase)
-- [Supabase CLI](https://supabase.com/docs/guides/cli)
-
-```bash
-# macOS
-brew install supabase/tap/supabase
-```
+- Docker + [Supabase CLI](https://supabase.com/docs/guides/cli) (for local DB — run from **bidph-api**)
 
 ## Local setup
 
-### 1. Start Supabase
+### 1. Start Supabase (**bidph-api**)
 
 ```bash
-cd /path/to/bidph
-supabase start
+cd ../bidph-api
+pnpm db:start
+pnpm db:env       # copy API URL, PUBLISHABLE_KEY, SECRET_KEY
 ```
 
-Copy the **API URL**, **anon key**, and **service_role key** from the output (or `supabase status`).
-
-### 2. Configure environment
+### 2. Configure the web app
 
 ```bash
+cd ../bidph
 cp .env.example web/.env.local
 ```
 
-Edit `web/.env.local` with keys from `supabase status`.
+Edit `web/.env.local` with `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` from `bidph-api` `pnpm db:env`.
 
-### 3. Apply migrations
-
-Migrations run automatically on `supabase start`. To reset:
+### 3. Reset / seed (optional, in **bidph-api**)
 
 ```bash
-pnpm db:reset
+cd ../bidph-api
+pnpm db:reset           # migrations + seed hook
+pnpm db:seed-items      # demo auctions after you register a user in the web app
 ```
 
-### 4. Seed data (optional)
+Admin SQL: `bidph-api/supabase/scripts/create-admin.sql`.
 
-`seed.sql` inserts **demo auctions only** — no users, wallets, or bids. Listings are owned by the first `seller` / `admin` in the database.
+**Dev admin:** set `VITE_DEV_ADMIN_EMAIL` in `web/.env.local`, restart `pnpm dev`, sign in — see [bidph-api README](../bidph-api/README.md).
 
-On a fresh `pnpm db:reset` there are no users yet, so the seed skips. After at least one account exists at `/register`:
+### 4. Run the web app
 
 ```bash
-pnpm db:seed-items          # local
-pnpm db:seed-items:remote   # linked Supabase (demo/staging)
-```
-
-The seed prints a status table. If no seller exists yet, it promotes the oldest user to seller for demo listings.
-
-**Create an admin** (local dev):
-
-Set in `web/.env.local` (then restart `pnpm dev` and sign in with that email):
-
-```bash
-VITE_DEV_ADMIN_EMAIL=you@example.com
-```
-
-Route guards treat that email as admin; on login the app also calls `claim_dev_admin` so Supabase RLS/RPCs work.
-
-Or promote manually in SQL:
-
-```sql
-UPDATE public.users SET role = 'admin', kyc_status = 'approved' WHERE email = 'you@example.com';
-```
-
-Or use the full script: `supabase/scripts/create-admin.sql` (edit email/password first).
-
-**Why no users in seed?** Predictable test accounts (`password123`, fixed emails) are easy to abuse if seed ever runs outside local dev. Create your own accounts via `/register`; use SQL only for admin promotion.
-
-### 5. Install & run the web app
-
-```bash
+cd ../bidph
 pnpm install
 pnpm dev
 ```
@@ -93,58 +61,42 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Typical local flow
 
-**With seed data**:
+1. Start Supabase in **bidph-api**, configure **bidph** `web/.env.local`.
+2. Register at `/register`, complete profile/KYC.
+3. `pnpm db:seed-items` in **bidph-api** for demo auctions (needs a seller/admin user).
+4. Promote admin via SQL or `VITE_DEV_ADMIN_EMAIL`.
+5. Cash in → allocate → sell → bid.
 
-1. Register, complete profile/KYC, get **seller** role (admin approves KYC).
-2. Run `pnpm db:seed-items` for demo auctions.
-3. Promote your account to **admin** (SQL above) to use `/admin`.
-
-**Without seed** (manual setup):
-
-1. **Register** at `/register` (creates `users` + `wallet` via trigger).
-2. **Profile** at `/account/profile` — fill legal name, address, DOB, GCash.
-3. **KYC** at `/account/kyc` — upload ID + selfie.
-4. **Promote admin** in Supabase Studio SQL: `UPDATE public.users SET role = 'admin' WHERE email = 'you@example.com';`
-5. **Approve KYC** at `/admin/kyc`.
-6. **Cash in** at `/wallet/cash-in` — use **Simulate cash-in** in dev.
-7. **Allocate** Idle → Bidding on `/wallet`.
-8. **Create auction** at `/sell/new` → edit → **Publish**.
-9. **Bid** on `/auctions/:id`.
-
-## Scripts
+## Scripts (this repo)
 
 | Command | Description |
 |---------|-------------|
-| `pnpm dev` | Start web app (port 3000) |
+| `pnpm dev` | Start web on port 3000 |
 | `pnpm build` | Production build |
-| `pnpm db:start` | Start local Supabase |
-| `pnpm db:reset` | Reset DB, re-run migrations, run seed (items if seller exists) |
-| `pnpm db:seed-items` | Insert demo auctions locally |
-| `pnpm db:seed-items:remote` | Insert demo auctions on linked Supabase project |
+| `pnpm check` | lint + typecheck + test |
+
+Database scripts (`db:start`, `db:reset`, …) are in **bidph-api**.
 
 ## Project layout
 
 ```
 bidph/
-├── web/                 # TanStack Start app
-├── supabase/
-│   ├── migrations/      # Schema, RPCs, RLS
-│   ├── seed.sql         # Local dev mock data
-│   └── config.toml
-└── docs/                # Spec & implementation plan
+└── web/                 # TanStack Start app
 ```
 
-## PayMongo webhook
+```
+bidph-api/               # sibling repo
+└── supabase/            # migrations, seed, config.toml
+```
 
-`POST /api/webhooks/paymongo` expects PayMongo checkout metadata with `user_id`. Requires `SUPABASE_SERVICE_ROLE_KEY` in `web/.env.local`.
+Specs: [`../docs/`](../docs/) — [spec-v1-plan2.md](../docs/spec-v1-plan2.md).
 
-For local testing without PayMongo, use **Simulate cash-in** on the cash-in page (`dev_simulate_cash_in` RPC).
+## PayMongo
+
+Webhooks and service role belong in **bidph-api**, not here. For local cash-in without PayMongo, use **Simulate cash-in** on `/wallet/cash-in`.
 
 ## Production notes
 
-- Schema deploys use migrations only (`supabase db push`). Demo auction data: `pnpm db:seed-items:remote` (not `db reset` on remote).
-- Never commit or automate admin credentials; promote admins manually per environment.
-- Disable or remove `dev_simulate_cash_in` before production.
-- Configure Supabase Auth OAuth (Google/Facebook) in the dashboard.
-- Set `PAYMONGO_WEBHOOK_SECRET` and verify signatures in the webhook handler.
-- Use `pg_cron` or a scheduled job for `end_expired_auctions()`.
+- Schema: `pnpm db:push` from **bidph-api** only.
+- Web env: publishable key + public Supabase URL only; no secret key.
+- Disable `dev_simulate_cash_in` before production.

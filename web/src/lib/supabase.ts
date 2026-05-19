@@ -1,19 +1,22 @@
 import { createClient } from '@supabase/supabase-js'
-import { env, getServiceRoleKey } from './env'
+import { env } from './env'
 
-export const supabase = createClient(env.supabaseUrl, env.supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-  },
-})
-
-export function createServiceClient() {
-  const key = getServiceRoleKey()
-  if (!key) {
-    throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for server operations')
+async function createSupabaseOptions() {
+  const options: NonNullable<Parameters<typeof createClient>[2]> = {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+    },
   }
-  return createClient(env.supabaseUrl, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  })
+
+  if (import.meta.env.SSR) {
+    const { default: ws } = await import('ws')
+    options.realtime = { transport: ws as NonNullable<NonNullable<Parameters<typeof createClient>[2]>['realtime']>['transport'] }
+  }
+
+  return options
 }
+
+const options = await createSupabaseOptions()
+
+export const supabase = createClient(env.supabaseUrl, env.supabasePublishableKey, options)
