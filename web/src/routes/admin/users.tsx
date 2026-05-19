@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
-import { Card } from '../../components/ui'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
+import { Button, Card } from '../../components/ui'
 import type { User } from '../../lib/database.types'
 import { supabase } from '../../lib/supabase'
 
@@ -9,6 +10,9 @@ export const Route = createFileRoute('/admin/users')({
 })
 
 function AdminUsersPage() {
+  const qc = useQueryClient()
+  const [bypassingId, setBypassingId] = useState<string | null>(null)
+
   const { data: users, isLoading, error } = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
@@ -20,6 +24,15 @@ function AdminUsersPage() {
       return data as User[]
     },
   })
+
+  async function bypassKyc(userId: string) {
+    setBypassingId(userId)
+    await supabase.rpc('admin_bypass_kyc', { p_user_id: userId })
+    setBypassingId(null)
+    await qc.invalidateQueries({ queryKey: ['admin-users'] })
+    await qc.invalidateQueries({ queryKey: ['kyc-needs-bypass'] })
+    await qc.invalidateQueries({ queryKey: ['kyc-pending'] })
+  }
 
   if (isLoading) return <Card>Loading users…</Card>
   if (error) return <Card>Could not load users.</Card>
@@ -36,6 +49,7 @@ function AdminUsersPage() {
               <th className="px-4 py-3 font-medium">Role</th>
               <th className="px-4 py-3 font-medium">KYC</th>
               <th className="px-4 py-3 font-medium">Joined</th>
+              <th className="px-4 py-3 font-medium">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -55,11 +69,23 @@ function AdminUsersPage() {
                 <td className="px-4 py-3 text-[var(--sea-ink-soft)]">
                   {new Date(u.created_at).toLocaleDateString()}
                 </td>
+                <td className="px-4 py-3">
+                  {u.kyc_status !== 'approved' && (
+                    <Button
+                      variant="secondary"
+                      className="px-3 py-1.5 text-xs"
+                      disabled={bypassingId === u.id}
+                      onClick={() => bypassKyc(u.id)}
+                    >
+                      {bypassingId === u.id ? '…' : 'Bypass KYC'}
+                    </Button>
+                  )}
+                </td>
               </tr>
             ))}
             {!users?.length && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-[var(--sea-ink-soft)]">
+                <td colSpan={6} className="px-4 py-8 text-center text-[var(--sea-ink-soft)]">
                   No users yet.
                 </td>
               </tr>

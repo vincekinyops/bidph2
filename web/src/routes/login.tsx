@@ -1,6 +1,8 @@
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Alert, Button, Card, Input, Page } from '../components/ui'
+import { resolvePostLoginPath } from '../lib/post-login'
+import { routerRedirect } from '../lib/router-redirect'
 import { supabase } from '../lib/supabase'
 
 type LoginSearch = {
@@ -11,11 +13,18 @@ export const Route = createFileRoute('/login')({
   validateSearch: (search: Record<string, unknown>): LoginSearch => ({
     redirect: typeof search.redirect === 'string' ? search.redirect : undefined,
   }),
+  beforeLoad: async ({ search }) => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) return
+    const path = await resolvePostLoginPath(search.redirect)
+    routerRedirect({ to: path })
+  },
   component: LoginPage,
 })
 
 function LoginPage() {
-  const navigate = useNavigate()
   const { redirect } = Route.useSearch()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -27,16 +36,13 @@ function LoginPage() {
     setLoading(true)
     setError(null)
     const { error: err } = await supabase.auth.signInWithPassword({ email, password })
-    setLoading(false)
     if (err) {
+      setLoading(false)
       setError(err.message)
       return
     }
-    if (redirect && redirect.startsWith('/')) {
-      window.location.href = redirect
-      return
-    }
-    navigate({ to: '/' })
+    const path = await resolvePostLoginPath(redirect)
+    window.location.assign(path)
   }
 
   return (

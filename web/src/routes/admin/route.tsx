@@ -4,7 +4,9 @@ import { Page } from '../../components/ui'
 import { requireAdmin } from '../../lib/route-guards'
 
 export const Route = createFileRoute('/admin')({
-  beforeLoad: () => requireAdmin(),
+  beforeLoad: async () => {
+    await requireAdmin()
+  },
   component: AdminLayout,
 })
 
