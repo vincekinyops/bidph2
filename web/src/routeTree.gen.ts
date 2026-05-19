@@ -14,6 +14,8 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WalletIndexRouteImport } from './routes/wallet/index'
 import { Route as SellIndexRouteImport } from './routes/sell/index'
+import { Route as AuctionsIndexRouteImport } from './routes/auctions/index'
+import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as WalletCashInRouteImport } from './routes/wallet/cash-in'
 import { Route as SellNewRouteImport } from './routes/sell/new'
 import { Route as AuctionsIdRouteImport } from './routes/auctions/$id'
@@ -46,6 +48,16 @@ const WalletIndexRoute = WalletIndexRouteImport.update({
 const SellIndexRoute = SellIndexRouteImport.update({
   id: '/sell/',
   path: '/sell/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuctionsIndexRoute = AuctionsIndexRouteImport.update({
+  id: '/auctions/',
+  path: '/auctions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountIndexRoute = AccountIndexRouteImport.update({
+  id: '/account/',
+  path: '/account/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WalletCashInRoute = WalletCashInRouteImport.update({
@@ -99,6 +111,8 @@ export interface FileRoutesByFullPath {
   '/auctions/$id': typeof AuctionsIdRoute
   '/sell/new': typeof SellNewRoute
   '/wallet/cash-in': typeof WalletCashInRoute
+  '/account/': typeof AccountIndexRoute
+  '/auctions/': typeof AuctionsIndexRoute
   '/sell/': typeof SellIndexRoute
   '/wallet/': typeof WalletIndexRoute
   '/api/webhooks/paymongo': typeof ApiWebhooksPaymongoRoute
@@ -114,6 +128,8 @@ export interface FileRoutesByTo {
   '/auctions/$id': typeof AuctionsIdRoute
   '/sell/new': typeof SellNewRoute
   '/wallet/cash-in': typeof WalletCashInRoute
+  '/account': typeof AccountIndexRoute
+  '/auctions': typeof AuctionsIndexRoute
   '/sell': typeof SellIndexRoute
   '/wallet': typeof WalletIndexRoute
   '/api/webhooks/paymongo': typeof ApiWebhooksPaymongoRoute
@@ -130,6 +146,8 @@ export interface FileRoutesById {
   '/auctions/$id': typeof AuctionsIdRoute
   '/sell/new': typeof SellNewRoute
   '/wallet/cash-in': typeof WalletCashInRoute
+  '/account/': typeof AccountIndexRoute
+  '/auctions/': typeof AuctionsIndexRoute
   '/sell/': typeof SellIndexRoute
   '/wallet/': typeof WalletIndexRoute
   '/api/webhooks/paymongo': typeof ApiWebhooksPaymongoRoute
@@ -147,6 +165,8 @@ export interface FileRouteTypes {
     | '/auctions/$id'
     | '/sell/new'
     | '/wallet/cash-in'
+    | '/account/'
+    | '/auctions/'
     | '/sell/'
     | '/wallet/'
     | '/api/webhooks/paymongo'
@@ -162,6 +182,8 @@ export interface FileRouteTypes {
     | '/auctions/$id'
     | '/sell/new'
     | '/wallet/cash-in'
+    | '/account'
+    | '/auctions'
     | '/sell'
     | '/wallet'
     | '/api/webhooks/paymongo'
@@ -177,6 +199,8 @@ export interface FileRouteTypes {
     | '/auctions/$id'
     | '/sell/new'
     | '/wallet/cash-in'
+    | '/account/'
+    | '/auctions/'
     | '/sell/'
     | '/wallet/'
     | '/api/webhooks/paymongo'
@@ -193,6 +217,8 @@ export interface RootRouteChildren {
   AuctionsIdRoute: typeof AuctionsIdRoute
   SellNewRoute: typeof SellNewRoute
   WalletCashInRoute: typeof WalletCashInRoute
+  AccountIndexRoute: typeof AccountIndexRoute
+  AuctionsIndexRoute: typeof AuctionsIndexRoute
   SellIndexRoute: typeof SellIndexRoute
   WalletIndexRoute: typeof WalletIndexRoute
   ApiWebhooksPaymongoRoute: typeof ApiWebhooksPaymongoRoute
@@ -234,6 +260,20 @@ declare module '@tanstack/react-router' {
       path: '/sell'
       fullPath: '/sell/'
       preLoaderRoute: typeof SellIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auctions/': {
+      id: '/auctions/'
+      path: '/auctions'
+      fullPath: '/auctions/'
+      preLoaderRoute: typeof AuctionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account/': {
+      id: '/account/'
+      path: '/account'
+      fullPath: '/account/'
+      preLoaderRoute: typeof AccountIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/wallet/cash-in': {
@@ -305,6 +345,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuctionsIdRoute: AuctionsIdRoute,
   SellNewRoute: SellNewRoute,
   WalletCashInRoute: WalletCashInRoute,
+  AccountIndexRoute: AccountIndexRoute,
+  AuctionsIndexRoute: AuctionsIndexRoute,
   SellIndexRoute: SellIndexRoute,
   WalletIndexRoute: WalletIndexRoute,
   ApiWebhooksPaymongoRoute: ApiWebhooksPaymongoRoute,

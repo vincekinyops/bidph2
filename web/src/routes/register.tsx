@@ -24,7 +24,7 @@ function RegisterPage() {
       setError(err.message)
       return
     }
-    navigate({ to: '/account/profile' })
+    navigate({ to: '/account' })
   }
 
   return (

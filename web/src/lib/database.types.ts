@@ -7,12 +7,25 @@ export interface User {
   role: UserRole
   kyc_status: KycStatus
   email: string
+  reference_number: string
   full_legal_name: string | null
   current_address: string | null
   date_of_birth: string | null
   gcash_mobile: string | null
   created_at: string
   updated_at: string
+}
+
+export interface UserPublicProfile {
+  id: string
+  reference_number: string
+}
+
+export interface WatchlistItem {
+  id: string
+  user_id: string
+  auction_id: string
+  created_at: string
 }
 
 export interface Wallet {
@@ -69,6 +82,10 @@ export interface Bid {
   user_id: string
   amount: number
   created_at: string
+}
+
+export interface BidWithBidder extends Bid {
+  reference_number: string
 }
 
 export interface KycSubmission {

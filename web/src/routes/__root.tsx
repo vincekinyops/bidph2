@@ -1,13 +1,14 @@
-import { HeadContent, Scripts, createRootRoute, Outlet } from '@tanstack/react-router'
+import { HeadContent, Scripts, createRootRoute, Outlet, useRouterState } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
+import { useEffect } from 'react'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
 import { AuthProvider } from '../lib/auth'
 import appCss from '../styles.css?url'
 
-const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getItem('theme');var mode=(stored==='light'||stored==='dark'||stored==='auto')?stored:'auto';var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=mode==='auto'?(prefersDark?'dark':'light'):mode;var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);if(mode==='auto'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',mode)}root.style.colorScheme=resolved;}catch(e){}})();`
+const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getItem('theme');if(stored==='auto'){stored='light';window.localStorage.setItem('theme','light')}var mode=(stored==='light'||stored==='dark')?stored:'light';var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(mode);root.setAttribute('data-theme',mode);root.style.colorScheme=mode;if(window.location.pathname==='/'||window.location.pathname===''){root.classList.add('landing-route')}}catch(e){}})();`
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000 } },
@@ -33,7 +34,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <HeadContent />
       </head>
-      <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]">
+      <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-amber-200/60 selection:text-slate-900" suppressHydrationWarning>
         {children}
         <TanStackDevtools
           config={{ position: 'bottom-right' }}
@@ -48,12 +49,27 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  const isLanding = useRouterState({ select: (s) => s.location.pathname === '/' })
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('landing-route', isLanding)
+    return () => document.documentElement.classList.remove('landing-route')
+  }, [isLanding])
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Header />
-        <Outlet />
-        <Footer />
+        {isLanding ? (
+          <Outlet />
+        ) : (
+          <div className="app-shell">
+            <Header />
+            <div className="app-shell__main">
+              <Outlet />
+            </div>
+            <Footer />
+          </div>
+        )}
       </AuthProvider>
     </QueryClientProvider>
   )

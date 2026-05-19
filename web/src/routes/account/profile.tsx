@@ -1,9 +1,11 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import { AccountNav } from '../../components/AccountNav'
 import { RequireAuth } from '../../components/RequireAuth'
 import { Alert, Button, Card, Input, Page } from '../../components/ui'
 import { useAuth } from '../../lib/auth'
 import { supabase } from '../../lib/supabase'
+import { formatUserRef } from '../../lib/user'
 
 export const Route = createFileRoute('/account/profile')({
   component: ProfilePage,
@@ -49,8 +51,14 @@ function ProfileForm() {
 
   return (
     <Page className="max-w-lg">
+      <AccountNav />
       <Card>
         <h1 className="mb-2 text-2xl font-bold text-[var(--sea-ink)]">Profile & KYC info</h1>
+        {profile?.reference_number && (
+          <p className="mb-2 font-mono text-sm text-[var(--lagoon-deep)]">
+            {formatUserRef(profile.reference_number)}
+          </p>
+        )}
         <p className="mb-4 text-sm text-[var(--sea-ink-soft)]">
           KYC status: <strong>{profile?.kyc_status}</strong>
         </p>

@@ -167,7 +167,7 @@ function WalletContent() {
         <h2 className="mb-4 font-semibold text-[var(--sea-ink)]">Transaction history</h2>
         <ul className="space-y-2 text-sm">
           {txQuery.data?.map((t) => (
-            <li key={t.id} className="flex justify-between border-b border-[rgba(23,58,64,0.08)] py-2">
+            <li key={t.id} className="flex justify-between border-b border-[var(--line)] py-2">
               <span>
                 {t.type} · {t.status}
               </span>

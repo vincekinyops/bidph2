@@ -63,7 +63,7 @@ function NewAuctionForm() {
           <label className="block text-sm">
             <span className="mb-1 block font-medium">Description</span>
             <textarea
-              className="w-full rounded-xl border border-[rgba(23,58,64,0.15)] bg-white/80 px-4 py-2.5"
+              className="w-full rounded-xl border border-[var(--line)] bg-[var(--surface-strong)] px-4 py-2.5"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}

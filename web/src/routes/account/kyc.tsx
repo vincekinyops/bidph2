@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import { AccountNav } from '../../components/AccountNav'
 import { RequireAuth } from '../../components/RequireAuth'
 import { Alert, Button, Card, Page } from '../../components/ui'
 import { useAuth } from '../../lib/auth'
@@ -66,6 +67,7 @@ function KycForm() {
 
   return (
     <Page className="max-w-lg">
+      <AccountNav />
       <Card>
         <h1 className="mb-4 text-2xl font-bold text-[var(--sea-ink)]">KYC verification</h1>
         <p className="mb-4 text-sm text-[var(--sea-ink-soft)]">
